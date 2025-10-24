@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSystemHealth, useWebsites } from '@/lib/hooks';
+import { LoadingPage } from '@/components/ui/loading';
 import { APITest } from '@/components/debug/api-test';
 import { formatRelativeTime } from '@/lib/file-utils';
 import { 

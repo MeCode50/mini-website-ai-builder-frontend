@@ -69,6 +69,10 @@ export interface SystemHealth {
     generationSuccessRate: number;
     averageGenerationTime: number;
   };
+  services?: {
+    database: string;
+    ai: string;
+  };
 }
 
 // Create axios instance
