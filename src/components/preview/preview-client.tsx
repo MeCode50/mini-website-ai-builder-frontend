@@ -26,18 +26,19 @@ export function PreviewClient({ id }: PreviewClientProps) {
     return <LoadingPage message="Loading website preview..." />;
   }
 
-  if (error || !websiteData?.data) {
+  if (error || !websiteData) {
     console.error('Preview Error:', { error, websiteData });
     notFound();
   }
 
-  const website = websiteData.data;
+  // Handle both wrapped and direct response structures
+  const website = websiteData?.data || websiteData;
 
   // If we have preview data, use it; otherwise use the main website data
-  const displayWebsite = previewData?.data ? {
+  const displayWebsite = previewData ? {
     ...website,
-    htmlContent: previewData.data.html,
-    cssContent: previewData.data.css,
+    htmlContent: (previewData as any)?.data?.html || (previewData as any)?.html || website.htmlContent,
+    cssContent: (previewData as any)?.data?.css || (previewData as any)?.css || website.cssContent,
   } : website;
 
   console.log('Display Website:', displayWebsite);

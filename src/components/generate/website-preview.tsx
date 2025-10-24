@@ -16,6 +16,67 @@ interface WebsitePreviewProps {
   website: Website;
 }
 
+// Function to convert Next.js components to HTML for live preview
+function generateLivePreviewHTML(nextjsContent: any): string {
+  try {
+    // Extract the main page content
+    const pageContent = nextjsContent['page.tsx'] || '';
+    const layoutContent = nextjsContent['layout.tsx'] || '';
+    const globalsCSS = nextjsContent['globals.css'] || '';
+    
+    // Extract component styles and content
+    const components = nextjsContent.components || {};
+    
+    // Convert JSX-like content to HTML
+    let htmlContent = pageContent
+      .replace(/import.*?from.*?;?\n/g, '') // Remove imports
+      .replace(/export default function.*?{/, '') // Remove function declaration
+      .replace(/return \(/, '') // Remove return statement
+      .replace(/\);$/, '') // Remove closing
+      .replace(/className=/g, 'class=') // Convert className to class
+      .replace(/'/g, '"') // Convert single quotes to double quotes
+      .replace(/<(\w+)\s+class="([^"]*)"\s*\/>/g, '<$1 class="$2"></$1>') // Fix self-closing tags
+      .trim();
+
+    // Add basic HTML structure
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${nextjsContent.title || 'Generated Website'}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+          ${globalsCSS}
+          body { margin: 0; padding: 0; }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+      </body>
+      </html>
+    `;
+  } catch (error) {
+    console.error('Error generating live preview:', error);
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Preview Error</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="p-8">
+        <div class="text-center">
+          <h1 class="text-2xl font-bold text-gray-800">Preview Error</h1>
+          <p class="text-gray-600 mt-2">Unable to generate live preview</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+}
+
 export function WebsitePreview({ website }: WebsitePreviewProps) {
   const [activeTab, setActiveTab] = useState<'preview' | 'files' | 'code'>('preview');
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -138,18 +199,74 @@ export function WebsitePreview({ website }: WebsitePreviewProps) {
                 </div>
                 <div className="bg-background">
                   {isNextJSProject ? (
-                    <div className="p-8 text-center">
-                      <div className="text-6xl mb-4">⚛️</div>
-                      <h3 className="text-xl font-semibold mb-2">Next.js Project Generated</h3>
-                      <p className="text-muted-foreground mb-4">
-                        This is a complete Next.js project. Download the ZIP file to run it locally.
-                      </p>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>📦 Complete project structure</p>
-                        <p>⚡ Next.js App Router</p>
-                        <p>🎨 Tailwind CSS + shadcn/ui</p>
-                        <p>📘 TypeScript support</p>
+                    <div className="p-8">
+                      <div className="text-center mb-6">
+                        <div className="text-6xl mb-4">⚛️</div>
+                        <h3 className="text-xl font-semibold mb-2">Next.js Project Generated</h3>
+                        <p className="text-muted-foreground mb-4">
+                          This is a complete Next.js project. Download the ZIP file to run it locally.
+                        </p>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <p>📦 Complete project structure</p>
+                          <p>⚡ Next.js App Router</p>
+                          <p>🎨 Tailwind CSS + shadcn/ui</p>
+                          <p>📘 TypeScript support</p>
+                        </div>
                       </div>
+                      
+                      {/* Live Preview of the Website */}
+                      {nextjsContent && (
+                        <div className="mt-6">
+                          <h4 className="font-semibold mb-4">Live Preview:</h4>
+                          <div className="border rounded-lg overflow-hidden bg-white">
+                            <div className="bg-gray-100 px-4 py-2 text-sm font-medium border-b flex items-center">
+                              <div className="flex space-x-2">
+                                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                              </div>
+                              <span className="ml-4 text-gray-600">Live Preview</span>
+                            </div>
+                            <div className="p-0">
+                              <iframe
+                                srcDoc={generateLivePreviewHTML(nextjsContent)}
+                                className="w-full h-[600px] border-0"
+                                title="Live Website Preview"
+                                sandbox="allow-scripts allow-same-origin"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Show a preview of the main page content */}
+                      {nextjsContent && (
+                        <div className="mt-6 p-4 bg-muted rounded-lg">
+                          <h4 className="font-semibold mb-2">Preview of Generated Content:</h4>
+                          <div className="text-sm text-muted-foreground">
+                            {nextjsContent['page.tsx'] && (
+                              <div className="mb-2">
+                                <strong>Main Page:</strong>
+                                <pre className="mt-1 p-2 bg-background rounded text-xs overflow-x-auto">
+                                  {nextjsContent['page.tsx'].substring(0, 200)}...
+                                </pre>
+                              </div>
+                            )}
+                            {nextjsContent.components && (
+                              <div>
+                                <strong>Components:</strong>
+                                <div className="mt-1 text-xs">
+                                  {Object.keys(nextjsContent.components).map(component => (
+                                    <span key={component} className="inline-block bg-primary/10 text-primary px-2 py-1 rounded mr-2 mb-1">
+                                      {component}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <iframe
