@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useWebsites } from '@/lib/hooks';
+import { Website } from '@/lib/api';
 import { LoadingCard } from '@/components/ui/loading';
 import { formatRelativeTime, generatePreviewThumbnail } from '@/lib/file-utils';
 import { FrameworkBadges } from '@/components/ui/framework-badges';
@@ -57,15 +58,18 @@ export default function GalleryPage() {
     );
   }
 
-  const websites = data?.data?.websites || [];
-  const totalPages = data?.data?.totalPages || 1;
+  // Try different data structures
+  const websites: Website[] = (data as any)?.data?.websites || (data as any)?.data || (data as any)?.websites || [];
+  const totalPages = (data as any)?.data?.totalPages || (data as any)?.totalPages || 1;
 
   // Debug logging
   console.log('Gallery Debug:', {
     data,
     websites,
     totalPages,
-    dataStructure: data?.data
+    dataStructure: data?.data,
+    dataKeys: data ? Object.keys(data) : [],
+    dataDataKeys: data?.data ? Object.keys(data.data) : []
   });
 
   const handleSearchChange = (value: string) => {
