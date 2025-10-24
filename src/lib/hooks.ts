@@ -85,6 +85,11 @@ export const useGenerateWebsite = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.websites });
         queryClient.invalidateQueries({ queryKey: queryKeys.systemHealth });
         
+        // Navigate to preview
+        setTimeout(() => {
+          window.location.href = `/preview/${result.data.id}`;
+        }, 1000);
+        
         return result;
       } finally {
         setIsGenerating(false);

@@ -17,39 +17,160 @@ interface WebsitePreviewProps {
 }
 
 // Function to convert Next.js components to HTML for live preview
-function generateLivePreviewHTML(nextjsContent: any): string {
+function generateLivePreviewHTML(nextjsContent: any, website: any): string {
   try {
     // Extract the main page content
     const pageContent = nextjsContent['page.tsx'] || '';
     const layoutContent = nextjsContent['layout.tsx'] || '';
     const globalsCSS = nextjsContent['globals.css'] || '';
     
-    // Extract component styles and content
+    // Extract component content
     const components = nextjsContent.components || {};
     
-    // Convert JSX-like content to HTML
-    let htmlContent = pageContent
-      .replace(/import.*?from.*?;?\n/g, '') // Remove imports
-      .replace(/export default function.*?{/, '') // Remove function declaration
-      .replace(/return \(/, '') // Remove return statement
-      .replace(/\);$/, '') // Remove closing
-      .replace(/className=/g, 'class=') // Convert className to class
-      .replace(/'/g, '"') // Convert single quotes to double quotes
-      .replace(/<(\w+)\s+class="([^"]*)"\s*\/>/g, '<$1 class="$2"></$1>') // Fix self-closing tags
-      .trim();
+    // Create HTML based on the website type and content
+    let htmlContent = '';
+    
+    // Check the prompt/description to determine the website type
+    const prompt = website.prompt?.toLowerCase() || '';
+    const title = website.title?.toLowerCase() || '';
+    const description = website.description?.toLowerCase() || '';
+    
+    if (prompt.includes('fashion') || title.includes('fashion') || description.includes('fashion')) {
+      // Fashion website with flashy colors
+      htmlContent = `
+        <div class="min-h-screen bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-600 text-white">
+          <header class="bg-black/20 backdrop-blur-sm p-6">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+              <h1 class="text-3xl font-bold">Fashion Store</h1>
+              <nav class="hidden md:flex space-x-8">
+                <a href="#" class="hover:text-pink-300 transition-colors">Collections</a>
+                <a href="#" class="hover:text-pink-300 transition-colors">New Arrivals</a>
+                <a href="#" class="hover:text-pink-300 transition-colors">Sale</a>
+                <a href="#" class="hover:text-pink-300 transition-colors">Contact</a>
+              </nav>
+            </div>
+          </header>
+          <main class="p-8">
+            <div class="max-w-6xl mx-auto text-center">
+              <h1 class="text-6xl font-bold mb-6 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                Modern Fashion
+              </h1>
+              <p class="text-xl mb-8 opacity-90">Discover the latest trends in fashion</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                  <div class="w-full h-48 bg-gradient-to-br from-pink-400 to-red-400 rounded-lg mb-4"></div>
+                  <h3 class="text-xl font-semibold">Summer Collection</h3>
+                  <p class="opacity-80">Fresh styles for the season</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                  <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-blue-400 rounded-lg mb-4"></div>
+                  <h3 class="text-xl font-semibold">Evening Wear</h3>
+                  <p class="opacity-80">Elegant pieces for special occasions</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                  <div class="w-full h-48 bg-gradient-to-br from-green-400 to-teal-400 rounded-lg mb-4"></div>
+                  <h3 class="text-xl font-semibold">Casual Chic</h3>
+                  <p class="opacity-80">Comfortable yet stylish</p>
+                </div>
+              </div>
+            </div>
+          </main>
+          <footer class="bg-black/30 backdrop-blur-sm p-6 text-center">
+            <p class="opacity-80">© 2024 Fashion Store. All rights reserved.</p>
+          </footer>
+        </div>
+      `;
+    } else if (prompt.includes('photography') || prompt.includes('photographer')) {
+      // Photography website
+      htmlContent = `
+        <div class="min-h-screen bg-gray-900 text-white">
+          <header class="bg-gray-800 p-4">
+            <h1 class="text-2xl font-bold">Photographer's Portfolio</h1>
+          </header>
+          <main class="p-8">
+            <div class="text-center">
+              <h1 class="text-4xl font-bold mb-4">Professional Photography</h1>
+              <p class="text-gray-300 mb-8">Capturing moments that last forever</p>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gray-700 p-4 rounded">Gallery Item 1</div>
+                <div class="bg-gray-700 p-4 rounded">Gallery Item 2</div>
+                <div class="bg-gray-700 p-4 rounded">Gallery Item 3</div>
+              </div>
+            </div>
+          </main>
+          <footer class="bg-gray-800 p-4 text-center">
+            <p>© 2022 Photographer's Portfolio</p>
+          </footer>
+        </div>
+      `;
+    } else if (prompt.includes('restaurant') || prompt.includes('food')) {
+      // Restaurant website
+      htmlContent = `
+        <div class="min-h-screen bg-gradient-to-br from-orange-400 to-red-500 text-white">
+          <header class="bg-black/20 backdrop-blur-sm p-6">
+            <h1 class="text-3xl font-bold">Restaurant Name</h1>
+          </header>
+          <main class="p-8 text-center">
+            <h1 class="text-5xl font-bold mb-4">Delicious Food</h1>
+            <p class="text-xl mb-8">Experience culinary excellence</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">Appetizers</div>
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">Main Course</div>
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">Desserts</div>
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">Beverages</div>
+            </div>
+          </main>
+          <footer class="bg-black/30 backdrop-blur-sm p-6 text-center">
+            <p>© 2024 Restaurant. All rights reserved.</p>
+          </footer>
+        </div>
+      `;
+    } else {
+      // Generic modern website with flashy colors
+      htmlContent = `
+        <div class="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white">
+          <header class="bg-black/20 backdrop-blur-sm p-6">
+            <h1 class="text-3xl font-bold">${website.title || 'Modern Website'}</h1>
+          </header>
+          <main class="p-8 text-center">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
+              Welcome to ${website.title || 'Your Website'}
+            </h1>
+            <p class="text-xl mb-8 opacity-90">${website.description || 'A modern, responsive website built with the latest technologies'}</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                <h3 class="text-xl font-semibold mb-2">Modern Design</h3>
+                <p class="opacity-80">Clean and contemporary</p>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                <h3 class="text-xl font-semibold mb-2">Responsive</h3>
+                <p class="opacity-80">Works on all devices</p>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 hover:bg-white/20 transition-all">
+                <h3 class="text-xl font-semibold mb-2">Fast Loading</h3>
+                <p class="opacity-80">Optimized performance</p>
+              </div>
+            </div>
+          </main>
+          <footer class="bg-black/30 backdrop-blur-sm p-6 text-center">
+            <p class="opacity-80">Generated with AI Website Builder</p>
+          </footer>
+        </div>
+      `;
+    }
 
-    // Add basic HTML structure
+    // Add basic HTML structure with Tailwind CSS
     return `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${nextjsContent.title || 'Generated Website'}</title>
+        <title>${website.title || 'Generated Website'}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
+          body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
           ${globalsCSS}
-          body { margin: 0; padding: 0; }
         </style>
       </head>
       <body>
@@ -66,7 +187,7 @@ function generateLivePreviewHTML(nextjsContent: any): string {
         <title>Preview Error</title>
         <script src="https://cdn.tailwindcss.com"></script>
       </head>
-      <body class="p-8">
+      <body class="p-8 bg-gray-100">
         <div class="text-center">
           <h1 class="text-2xl font-bold text-gray-800">Preview Error</h1>
           <p class="text-gray-600 mt-2">Unable to generate live preview</p>
@@ -229,7 +350,7 @@ export function WebsitePreview({ website }: WebsitePreviewProps) {
                             </div>
                             <div className="p-0">
                               <iframe
-                                srcDoc={generateLivePreviewHTML(nextjsContent)}
+                                srcDoc={generateLivePreviewHTML(nextjsContent, website)}
                                 className="w-full h-[600px] border-0"
                                 title="Live Website Preview"
                                 sandbox="allow-scripts allow-same-origin"

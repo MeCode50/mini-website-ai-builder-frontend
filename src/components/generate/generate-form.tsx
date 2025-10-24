@@ -64,7 +64,25 @@ export function GenerateForm() {
       setValue('description', '');
       setValue('isPublic', false);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate website';
+      console.error('Form submission error:', error);
+      
+      let errorMessage = 'Failed to generate website';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 400) {
+          errorMessage = axiosError.response?.data?.message || 'Invalid request. Please check your input and try again.';
+        } else if (axiosError.response?.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (axiosError.response?.status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (axiosError.code === 'NETWORK_ERROR') {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast.error(errorMessage);
     }
   };
