@@ -14,10 +14,35 @@ export function APITest() {
     setTestResult('Testing API connection...');
     
     try {
-      const result = await api.getSystemHealth();
-      setTestResult(`✅ API Connected!\nStatus: ${result.data.status}\nUptime: ${result.data.uptime}s\nDatabase: ${result.data.services?.database}\nAI: ${result.data.services?.ai}`);
+      // Test both endpoints
+      const [healthResult, websitesResult] = await Promise.allSettled([
+        api.getSystemHealth(),
+        api.getWebsites(1, 5)
+      ]);
+      
+      let resultText = '';
+      
+      // Health check result
+      if (healthResult.status === 'fulfilled' && healthResult.value?.data) {
+        const health = healthResult.value.data;
+        resultText += `✅ Health API: ${health.status}\nUptime: ${health.uptime}s\nDatabase: ${health.services?.database || 'unknown'}\nAI: ${health.services?.ai || 'unknown'}\n\n`;
+      } else {
+        resultText += `❌ Health API failed: ${healthResult.status === 'rejected' ? healthResult.reason?.message : 'No data'}\n\n`;
+      }
+      
+      // Websites result
+      if (websitesResult.status === 'fulfilled' && websitesResult.value?.data) {
+        const websites = websitesResult.value.data;
+        resultText += `✅ Websites API: ${websites.websites?.length || 0} websites found\nTotal: ${websites.total || 0}\n`;
+      } else {
+        resultText += `❌ Websites API failed: ${websitesResult.status === 'rejected' ? websitesResult.reason?.message : 'No data'}\n`;
+      }
+      
+      setTestResult(resultText);
+      
     } catch (error: any) {
-      setTestResult(`❌ API Error:\n${error.message}\n\nResponse: ${JSON.stringify(error.response?.data, null, 2)}`);
+      console.error('API Test Error:', error);
+      setTestResult(`❌ API Error:\nMessage: ${error.message}\nCode: ${error.code}\nStatus: ${error.response?.status}\nResponse: ${JSON.stringify(error.response?.data, null, 2)}`);
     } finally {
       setIsLoading(false);
     }

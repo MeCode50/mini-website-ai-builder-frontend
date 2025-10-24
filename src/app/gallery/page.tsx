@@ -60,6 +60,14 @@ export default function GalleryPage() {
   const websites = data?.data?.websites || [];
   const totalPages = data?.data?.totalPages || 1;
 
+  // Debug logging
+  console.log('Gallery Debug:', {
+    data,
+    websites,
+    totalPages,
+    dataStructure: data?.data
+  });
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
