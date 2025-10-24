@@ -80,13 +80,18 @@ export const useGenerateWebsite = () => {
         
         setGenerationProgress(100);
         
-        // Check if result and result.data exist
-        if (!result || !result.data) {
-          throw new Error('Invalid response from server: missing data');
+        // Handle both wrapped and direct response structures
+        const websiteData = result.data || result;
+        
+        // Check if we have valid website data
+        if (!websiteData || !websiteData.id) {
+          throw new Error('Invalid response from server: missing website data');
         }
         
+        console.log('Website data to store:', websiteData);
+        
         // Add to store
-        addWebsite(result.data);
+        addWebsite(websiteData);
         
         // Invalidate queries
         queryClient.invalidateQueries({ queryKey: queryKeys.websites });
@@ -94,8 +99,8 @@ export const useGenerateWebsite = () => {
         
         // Navigate to preview
         setTimeout(() => {
-          if (result.data && result.data.id) {
-            window.location.href = `/preview/${result.data.id}`;
+          if (websiteData && websiteData.id) {
+            window.location.href = `/preview/${websiteData.id}`;
           } else {
             console.error('Cannot navigate: missing website ID');
           }

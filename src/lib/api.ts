@@ -159,7 +159,23 @@ export const api = {
     try {
       const response = await apiClient.post('/websites/generate', data);
       console.log('Generate response received:', response.data);
-      return response.data;
+      console.log('Response structure check:', {
+        hasId: !!response.data?.id,
+        hasTitle: !!response.data?.title,
+        hasHtmlContent: !!response.data?.htmlContent,
+        responseKeys: Object.keys(response.data || {})
+      });
+      
+      // Backend returns website data directly, not wrapped in { success: true, data: ... }
+      // So we need to wrap it in the expected format
+      const wrappedResponse = {
+        success: true,
+        data: response.data,
+        message: 'Website generated successfully'
+      };
+      
+      console.log('Wrapped response:', wrappedResponse);
+      return wrappedResponse;
     } catch (error: any) {
       console.error('Generate request failed:', error);
       throw error;

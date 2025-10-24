@@ -27,13 +27,45 @@ function generateLivePreviewHTML(nextjsContent: any, website: any): string {
     // Extract component content
     const components = nextjsContent.components || {};
     
-    // Create HTML based on the website type and content
-    let htmlContent = '';
+    // If we have actual generated content, use it instead of fallback
+    if (pageContent && pageContent.length > 50) {
+      // Convert JSX to HTML for preview
+      let htmlContent = pageContent
+        .replace(/import.*?from.*?;?\n/g, '') // Remove imports
+        .replace(/export default function.*?{/, '') // Remove function declaration
+        .replace(/return \(/, '') // Remove return statement
+        .replace(/\);$/, '') // Remove closing
+        .replace(/className=/g, 'class=') // Convert className to class
+        .replace(/'/g, '"') // Convert single quotes to double quotes
+        .trim();
+
+      // Add basic HTML structure with Tailwind CSS
+      return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${website.title || 'Generated Website'}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+            ${globalsCSS}
+          </style>
+        </head>
+        <body>
+          ${htmlContent}
+        </body>
+        </html>
+      `;
+    }
     
-    // Check the prompt/description to determine the website type
+    // Fallback to type-based generation for simple content
     const prompt = website.prompt?.toLowerCase() || '';
     const title = website.title?.toLowerCase() || '';
     const description = website.description?.toLowerCase() || '';
+    
+    let htmlContent = '';
     
     if (prompt.includes('fashion') || title.includes('fashion') || description.includes('fashion')) {
       // Fashion website with flashy colors
@@ -353,7 +385,7 @@ export function WebsitePreview({ website }: WebsitePreviewProps) {
                                 srcDoc={generateLivePreviewHTML(nextjsContent, website)}
                                 className="w-full h-[600px] border-0"
                                 title="Live Website Preview"
-                                sandbox="allow-scripts allow-same-origin"
+                                sandbox="allow-scripts"
                               />
                             </div>
                           </div>
