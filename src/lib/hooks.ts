@@ -76,7 +76,14 @@ export const useGenerateWebsite = () => {
 
       try {
         const result = await api.generateWebsite(data);
+        console.log('Generation result:', result);
+        
         setGenerationProgress(100);
+        
+        // Check if result and result.data exist
+        if (!result || !result.data) {
+          throw new Error('Invalid response from server: missing data');
+        }
         
         // Add to store
         addWebsite(result.data);
@@ -87,10 +94,22 @@ export const useGenerateWebsite = () => {
         
         // Navigate to preview
         setTimeout(() => {
-          window.location.href = `/preview/${result.data.id}`;
+          if (result.data && result.data.id) {
+            window.location.href = `/preview/${result.data.id}`;
+          } else {
+            console.error('Cannot navigate: missing website ID');
+          }
         }, 1000);
         
         return result;
+      } catch (error) {
+        console.error('Generation failed:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
+        throw error;
       } finally {
         setIsGenerating(false);
         setGenerationProgress(0);

@@ -71,7 +71,13 @@ export function GenerateForm() {
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;
         if (axiosError.response?.status === 400) {
+          // Use the improved backend error message
           errorMessage = axiosError.response?.data?.message || 'Invalid request. Please check your input and try again.';
+          
+          // Add suggestions if available
+          if (axiosError.response?.data?.details?.suggestions) {
+            errorMessage += ` Suggestions: ${axiosError.response.data.details.suggestions.join(', ')}`;
+          }
         } else if (axiosError.response?.status === 500) {
           errorMessage = 'Server error. Please try again later.';
         } else if (axiosError.response?.status === 429) {
