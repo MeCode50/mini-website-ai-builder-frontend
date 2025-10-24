@@ -107,6 +107,11 @@ apiClient.interceptors.response.use(
       console.error('Network error - check if backend is running');
     }
     
+    // Handle database connection errors
+    if (error.response?.data?.services?.database === 'unhealthy') {
+      console.error('Backend database is unhealthy - check Railway logs');
+    }
+    
     return Promise.reject(error);
   }
 );

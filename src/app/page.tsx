@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSystemHealth, useWebsites } from '@/lib/hooks';
-import { LoadingPage } from '@/components/ui/loading';
+import { APITest } from '@/components/debug/api-test';
 import { formatRelativeTime } from '@/lib/file-utils';
 import { 
   Globe, 
@@ -66,6 +66,9 @@ export default function DashboardPage() {
           Overview of your AI website generation activity
         </p>
       </div>
+
+      {/* API Test */}
+      <APITest />
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
